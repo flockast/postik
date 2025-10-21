@@ -1,13 +1,22 @@
-import { type FastifyInstance, type FastifyRequest } from 'fastify'
+import { type FastifyPluginAsyncTypebox} from '@fastify/type-provider-typebox'
 import { DATA } from '../../../db'
+import { PostSchemas } from '../../../schemas'
 
-export default async (app: FastifyInstance) => {
-  app.post('/', async (req: FastifyRequest<{ Body: { title: string } }>) => {
-    const title: string = req.body.title
+const route: FastifyPluginAsyncTypebox = async (app) => {
+  app.post('/', {
+    schema: {
+      body: PostSchemas.Bodies.CreatePost,
+      response: {
+        201: PostSchemas.Bodies.Post,
+      }
+    }
+  }, async (request, reply) => {
+    const { title, content } = request.body
 
     const newPost = {
       id: DATA.POSTS.length + 1,
-      title
+      title: title || '',
+      content: content || ''
     }
 
     DATA.POSTS = [
@@ -15,8 +24,10 @@ export default async (app: FastifyInstance) => {
       newPost
     ]
 
-    return {
-      data: newPost
-    }
+    reply.status(201)
+
+    return newPost
   })
 }
+
+export default route

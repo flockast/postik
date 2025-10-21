@@ -12,6 +12,10 @@ export class Server {
     },
   })
 
+  private static async registerSensible() {
+    await Server.app.register(import('@fastify/sensible'))
+  }
+
   private static async registerRoutes() {
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = dirname(__filename)
@@ -44,6 +48,7 @@ export class Server {
   }
 
   public static async start() {
+    await Server.registerSensible()
     await Server.registerRoutes()
     await Server.listenServer()
   }

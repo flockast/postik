@@ -1,28 +1,43 @@
-import { type FastifyInstance, type FastifyRequest, type FastifyReply } from 'fastify'
+import { type FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox'
 import { DATA } from '../../../db'
+import { PostSchemas, CommonsSchemas } from '../../../schemas'
 
-export default async (app: FastifyInstance) => {
-  app.get('/', async (req, res) => {
+const route: FastifyPluginAsyncTypebox = async (app) => {
+  app.get('/', {
+    schema: {
+      querystring: CommonsSchemas.Queries.Pagination,
+      response: {
+        200: PostSchemas.Bodies.PostsPaginated
+      }
+    }
+  }, async (request) => {
+    const { offset, limit } = request.query
+
     return {
-      data: DATA.POSTS
+      count: DATA.POSTS.length,
+      data: DATA.POSTS.slice(offset, (offset || 0) + (limit || 0))
     }
   })
 
-  app.get('/:id', async (req: FastifyRequest<{ Params: { id: number } }>, res: FastifyReply) => {
-    const paramId = +req.params.id
+  app.get('/:postId', {
+    schema: {
+      params: PostSchemas.Params.PostId,
+      response: {
+        200: PostSchemas.Bodies.Post
+      }
+    }
+  }, async (request, response) => {
+    const { postId } = request.params
 
-    const findPost = DATA.POSTS.find((item) => {
-      return item.id === paramId
-    })
+    const post = DATA.POSTS.find((item) => `${item.id}` === `${postId}`)
 
-    if (!findPost) {
-      return res.status(404).send({
-        status: `Not found post by id=${paramId}`
-      })
+    if (!post) {
+      throw app.httpErrors.notFound()
     }
 
-    return {
-      data: findPost
-    }
+    return post
   })
 }
+
+export default route
+

@@ -1,6 +1,7 @@
 export type TypePost = {
   id: number
   title: string
+  content: string
 }
 
 export type TypeData = {
@@ -11,11 +12,13 @@ export const DATA: TypeData = {
   POSTS: [
     {
       id: 1,
-      title: 'post1'
+      title: 'title1',
+      content: 'content1',
     },
     {
       id: 2,
-      title: 'post2'
+      title: 'title2',
+      content: 'content2',
     }
   ]
 }
