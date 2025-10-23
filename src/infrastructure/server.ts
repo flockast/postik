@@ -2,16 +2,25 @@ import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { fastify } from 'fastify'
 import autoLoad from '@fastify/autoload'
+import qs from 'qs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 export class Server {
   private static app = fastify({
+    querystringParser: (str) => qs.parse(str),
     logger: {
       transport: {
         target: 'pino-pretty'
       },
+      redact: {
+        paths: [
+          '[*].password',
+          '[*].user',
+        ],
+        censor: "***"
+      }
     },
   })
 
@@ -26,9 +35,16 @@ export class Server {
     })
   }
 
+  private static async registerServices() {
+    await Server.app.register(autoLoad, {
+      dir: join(__dirname, 'services'),
+      forceESM: true
+    })
+  }
+
   private static async registerRoutes() {
     await Server.app.register(autoLoad, {
-      dir: join(__dirname, 'routes'),
+      dir: join(__dirname, 'http/routes'),
       options: {
         prefix: '/api'
       },
@@ -57,6 +73,7 @@ export class Server {
   public static async start() {
     await Server.registerSensible()
     await Server.registerPlugins()
+    await Server.registerServices()
     await Server.registerRoutes()
     await Server.listenServer()
   }
