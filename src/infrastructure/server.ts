@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url'
 import { fastify } from 'fastify'
 import autoLoad from '@fastify/autoload'
 import qs from 'qs'
+import { errorHandler } from './http/errors'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -58,6 +59,10 @@ export class Server {
     })
   }
 
+  private static async setErrorHandler() {
+    Server.app.setErrorHandler(errorHandler)
+  }
+
   private static async listenServer() {
     try {
       await Server.app.listen({
@@ -74,6 +79,7 @@ export class Server {
     await Server.registerSensible()
     await Server.registerPlugins()
     await Server.registerServices()
+    await Server.setErrorHandler()
     await Server.registerRoutes()
     await Server.listenServer()
   }
