@@ -1,6 +1,6 @@
 import { type FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox'
+import { sql } from 'kysely'
 import { PostSchemas } from '../../../schemas'
-import { DATA } from '../../../db/index'
 
 const route: FastifyPluginAsyncTypebox = async (app) => {
   app.patch('/:postId', {
@@ -14,22 +14,25 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
   }, async (request) => {
     const { postId } = request.params
 
-    const postIndex = DATA.POSTS.findIndex((item) => `${item.id}` === `${postId}`)
+    const post = await app.db
+      .updateTable('posts')
+      .set({
+        ...request.body,
+        updated_at: sql`CURRENT_TIMESTAMP`
+      })
+      .where('id', '=', Number(postId))
+      .returning([
+        'id',
+        'title',
+        'content',
+      ])
+      .executeTakeFirst()
 
-    if (postIndex === -1) {
+    if (!post) {
       throw app.httpErrors.notFound()
     }
 
-    DATA.POSTS = DATA.POSTS.map((item, index) => (
-      index === postIndex
-        ? {
-          ...item,
-          ...request.body
-        }
-        : item
-    ))
-
-    return DATA.POSTS[postIndex]
+    return post
   })
 }
 

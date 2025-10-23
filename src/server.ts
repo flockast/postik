@@ -3,6 +3,9 @@ import { fileURLToPath } from 'url'
 import { fastify } from 'fastify'
 import autoLoad from '@fastify/autoload'
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
 export class Server {
   private static app = fastify({
     logger: {
@@ -16,10 +19,14 @@ export class Server {
     await Server.app.register(import('@fastify/sensible'))
   }
 
-  private static async registerRoutes() {
-    const __filename = fileURLToPath(import.meta.url)
-    const __dirname = dirname(__filename)
+  private static async registerPlugins() {
+    await Server.app.register(autoLoad, {
+      dir: join(__dirname, 'plugins'),
+      forceESM: true
+    })
+  }
 
+  private static async registerRoutes() {
     await Server.app.register(autoLoad, {
       dir: join(__dirname, 'routes'),
       options: {
@@ -49,6 +56,7 @@ export class Server {
 
   public static async start() {
     await Server.registerSensible()
+    await Server.registerPlugins()
     await Server.registerRoutes()
     await Server.listenServer()
   }

@@ -1,6 +1,5 @@
 import { type FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox'
 import { PostSchemas } from '../../../schemas'
-import { DATA } from '../../../db/index'
 
 const route: FastifyPluginAsyncTypebox = async (app) => {
   app.delete('/:postId', {
@@ -13,13 +12,19 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
   }, async (request) => {
     const { postId } = request.params
 
-    const post = DATA.POSTS.find((item) => `${item.id}` === `${postId}`)
+    const post = await app.db
+      .deleteFrom('posts')
+      .where('id', '=', Number(postId))
+      .returning([
+        'id',
+        'title',
+        'content'
+      ])
+      .executeTakeFirst()
 
     if (!post) {
       throw app.httpErrors.notFound()
     }
-
-    DATA.POSTS = DATA.POSTS.filter((item) => `${item.id}` !== `${post.id}`)
 
     return post
   })
