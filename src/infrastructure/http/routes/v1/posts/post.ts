@@ -4,6 +4,7 @@ import { PostSchemas } from '../../../schemas'
 const route: FastifyPluginAsyncTypebox = async (app) => {
   app.post('/', {
     schema: {
+      tags: ['Posts'],
       body: {
         ...PostSchemas.Bodies.CreatePost,
         required: ['title', 'content']

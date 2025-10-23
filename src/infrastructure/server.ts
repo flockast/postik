@@ -43,6 +43,13 @@ export class Server {
     })
   }
 
+  private static async registerSwagger() {
+    await Server.app.register(import('@fastify/swagger'))
+    await Server.app.register(import('@fastify/swagger-ui'), {
+      routePrefix: '/documentation'
+    })
+  }
+
   private static async registerRoutes() {
     await Server.app.register(autoLoad, {
       dir: join(__dirname, 'http/routes'),
@@ -80,6 +87,7 @@ export class Server {
     await Server.registerPlugins()
     await Server.registerServices()
     await Server.setErrorHandler()
+    await Server.registerSwagger()
     await Server.registerRoutes()
     await Server.listenServer()
   }

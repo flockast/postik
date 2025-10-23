@@ -1,18 +1,14 @@
 import { Type } from '@sinclair/typebox'
 import CommonSchemas from '../commons'
 
-export const CreatePost = Type.Object({
+export const Post = Type.Object({
+  id: Type.Number(),
   title: Type.String(),
   content: Type.String()
 })
 
-export const UpdatePost = Type.Partial(CreatePost)
+export const CreatePost = Type.Pick(Post, ['title', 'content'])
 
-export const Post = Type.Intersect([
-  Type.Object({
-    id: Type.Number()
-  }),
-  CreatePost
-])
+export const UpdatePost = Type.Partial(CreatePost)
 
 export const PostsPaginated = CommonSchemas.Bodies.PaginationResult(Post)
