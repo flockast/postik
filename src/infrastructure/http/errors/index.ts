@@ -23,5 +23,5 @@ export const errorHandler: FastifyInstance['errorHandler'] = function (error, re
 
   return reply
     .code(500)
-    .send(error.message)
+    .send(error)
 }

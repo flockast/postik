@@ -16,6 +16,12 @@ export class PostService {
     return post
   }
 
+  async findBySlug(slug: TypePost['slug']): Promise<TypePost> {
+    const post = await this.postRepository.findBySlug(slug)
+    this.handleNotFoundBySlug(post, slug)
+    return post
+  }
+
   create(post: TypePostCreate): Promise<TypePost> {
     return this.postRepository.create(post)
   }
@@ -34,5 +40,9 @@ export class PostService {
 
   private handleNotFound(post: TypePost | undefined, id: TypePost['id']): asserts post is TypePost {
     if (!post) throw new NotFoundException(`Post with id ${id} not found`)
+  }
+
+  private handleNotFoundBySlug(post: TypePost | undefined, slug: TypePost['slug']): asserts post is TypePost {
+    if (!post) throw new NotFoundException(`Post with slug ${slug} not found`)
   }
 }

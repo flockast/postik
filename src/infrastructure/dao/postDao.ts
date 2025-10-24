@@ -9,6 +9,7 @@ import { buildSortBy } from './utils'
 export class PostDao implements IPostRepository {
   protected readonly DEFAULT_SELECT_FIELDS = [
     'id',
+    'slug',
     'title',
     'content',
     'created_at as createdAt',
@@ -45,6 +46,14 @@ export class PostDao implements IPostRepository {
     return this.db
       .selectFrom('posts')
       .where('id', '=', id)
+      .select(this.DEFAULT_SELECT_FIELDS)
+      .executeTakeFirst()
+  }
+
+  findBySlug(slug: TypePost['slug']): Promise<TypePost | undefined> {
+    return this.db
+      .selectFrom('posts')
+      .where('slug', '=', slug)
       .select(this.DEFAULT_SELECT_FIELDS)
       .executeTakeFirst()
   }

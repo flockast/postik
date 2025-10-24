@@ -33,6 +33,19 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
     const { postId } = request.params
     return app.postsService.findById(postId!)
   })
+
+  app.get('/slug/:slug', {
+    schema: {
+      tags: ['Posts'],
+      params: PostSchemas.Params.Slug,
+      response: {
+        200: PostSchemas.Bodies.Post
+      }
+    }
+  }, (request) => {
+    const { slug } = request.params
+    return app.postsService.findBySlug(slug!)
+  })
 }
 
 export default route
