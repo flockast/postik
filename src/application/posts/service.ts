@@ -3,7 +3,7 @@ import type { TypePagination, TypeSortBy, TypePaginatedResult } from '../commons
 import type { IPostRepository } from './repository'
 import type { TypePost, TypePostCreate, TypePostUpdate } from './models'
 
-export class PostService {
+export class PostsService {
   constructor(protected readonly postRepository: IPostRepository) {}
 
   findAll(pagination: TypePagination, sortBy: TypeSortBy<TypePost>): Promise<TypePaginatedResult<TypePost>> {

@@ -1,7 +1,9 @@
-import PostSchemas from './posts'
 import CommonsSchemas from './commons'
+import CategorySchema from './categories'
+import PostSchemas from './posts'
 
 export {
-  PostSchemas,
-  CommonsSchemas
+  CommonsSchemas,
+  CategorySchema,
+  PostSchemas
 }
