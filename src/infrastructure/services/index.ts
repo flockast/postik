@@ -3,8 +3,8 @@ import type { ICategoryRepository } from '../../application/repositories/categor
 import type{ IPostRepository } from '../../application/repositories/post.repository'
 import { CategoriesService } from '../../application/services/category.service'
 import { PostsService } from '../../application/services/post.service'
-import { CategoryDao } from '../dao/CategoryDao'
-import { PostDao } from '../dao/PostDao'
+import { CategoryDao } from '../dao/category/CategoryDao'
+import { PostDao } from '../dao/post/PostDao'
 
 declare module 'fastify' {
   interface FastifyInstance {

@@ -6,7 +6,7 @@ import type { IPostRepository, TypePostWithCategory } from '../repositories/post
 export class PostsService {
   constructor(protected readonly postRepository: IPostRepository) {}
 
-  findAll(pagination: TypePagination, sortBy: TypeSortBy<TypePost>): Promise<TypePaginatedResult<TypePost>> {
+  findAll(pagination: TypePagination, sortBy: TypeSortBy<TypePost>): Promise<TypePaginatedResult<TypePostWithCategory>> {
     return this.postRepository.findAll(pagination, sortBy)
   }
 
@@ -16,23 +16,23 @@ export class PostsService {
     return post
   }
 
-  async findBySlug(slug: TypePost['slug']): Promise<TypePost> {
+  async findBySlug(slug: TypePost['slug']): Promise<TypePostWithCategory> {
     const post = await this.postRepository.findBySlug(slug)
     this.handleNotFoundBySlug(post, slug)
     return post
   }
 
-  create(post: TypePostCreate): Promise<TypePost> {
+  create(post: TypePostCreate): Promise<TypePostWithCategory> {
     return this.postRepository.create(post)
   }
 
-  async update(id: TypePost['id'], post: TypePostUpdate) {
+  async update(id: TypePost['id'], post: TypePostUpdate): Promise<TypePostWithCategory> {
     const updatedPost = await this.postRepository.update(id, post)
     this.handleNotFound(updatedPost, id)
     return updatedPost
   }
 
-  async delete(id: TypePost['id']) {
+  async delete(id: TypePost['id']): Promise<TypePostWithCategory> {
     const deletedPost = await this.postRepository.delete(id)
     this.handleNotFound(deletedPost, id)
     return deletedPost

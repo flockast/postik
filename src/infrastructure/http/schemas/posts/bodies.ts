@@ -3,9 +3,7 @@ import CommonSchemas from '../commons'
 
 export const Post = Type.Object({
   id: Type.Number(),
-  slug: Type.String({
-    pattern: '^[a-z0-9]+(?:[-_][a-z0-9]+)*$'
-  }),
+  slug: Type.String(),
   title: Type.String(),
   content: Type.String(),
   categoryId: Type.Union([Type.Number(), Type.Null()])
@@ -34,4 +32,4 @@ export const CreatePost = Type.Composite([
 
 export const UpdatePost = Type.Partial(CreatePost)
 
-export const PostsPaginated = CommonSchemas.Bodies.PaginationResult(Post)
+export const PostsPaginated = CommonSchemas.Bodies.PaginationResult(PostWithCategory)

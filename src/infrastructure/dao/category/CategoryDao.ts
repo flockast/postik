@@ -1,7 +1,7 @@
-import type { TypeCategory, TypeCategoryCreate, TypeCategoryUpdate } from '../../application/entities/category.entity'
-import type { ICategoryRepository } from '../../application/repositories/category.repository'
 import { type Kysely, type SelectExpression, sql } from 'kysely'
 import type { DB } from 'kysely-codegen'
+import type { TypeCategory, TypeCategoryCreate, TypeCategoryUpdate } from '../../../application/entities/category.entity'
+import type { ICategoryRepository } from '../../../application/repositories/category.repository'
 
 export class CategoryDao implements ICategoryRepository {
   protected readonly DEFAULT_SELECT_FIELDS = [

@@ -8,7 +8,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
       params: PostSchemas.Params.PostId,
       body: PostSchemas.Bodies.UpdatePost,
       response: {
-        200: PostSchemas.Bodies.Post
+        200: PostSchemas.Bodies.PostWithCategory
       }
     }
   }, (request) => {
