@@ -1,4 +1,4 @@
-import type { TypeCategory, TypeCategoryCreate, TypeCategoryUpdate } from './models'
+import type { TypeCategory, TypeCategoryCreate, TypeCategoryUpdate } from '../entities/category.entity'
 
 export interface ICategoryRepository {
   findAll(): Promise<TypeCategory[]>

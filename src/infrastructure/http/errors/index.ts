@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
-import { NotFoundException } from '../../../application'
+import { NotFoundException } from '../../../application/commons'
 
-export const errorHandler: FastifyInstance['errorHandler'] = function (error, request, reply) {
+export const errorHandler: FastifyInstance['errorHandler'] = (error, request, reply) => {
   if (error instanceof NotFoundException) {
     if (request.method === 'DELETE') {
       return reply.code(204).send()

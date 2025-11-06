@@ -1,7 +1,7 @@
 import { snakeCase } from 'change-case'
 import type { OrderByExpression } from 'kysely'
 import type { DB } from 'kysely-codegen'
-import type { TypeSortBy } from '../../application'
+import type { TypeSortBy } from '../../application/commons'
 
 export function buildSortBy<
   Table extends Exclude<keyof DB, 'schemaversion'>,

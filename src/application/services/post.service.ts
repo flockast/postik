@@ -1,7 +1,7 @@
 import { NotFoundException } from '../commons'
 import type { TypePagination, TypeSortBy, TypePaginatedResult } from '../commons'
-import type { IPostRepository } from './repository'
-import type { TypePost, TypePostCreate, TypePostUpdate } from './models'
+import type { TypePost, TypePostCreate, TypePostUpdate } from '../entities/post.entity'
+import type { IPostRepository, TypePostWithCategory } from '../repositories/post.repository'
 
 export class PostsService {
   constructor(protected readonly postRepository: IPostRepository) {}
@@ -10,7 +10,7 @@ export class PostsService {
     return this.postRepository.findAll(pagination, sortBy)
   }
 
-  async findById(id: TypePost['id']): Promise<TypePost> {
+  async findById(id: TypePost['id']): Promise<TypePostWithCategory> {
     const post = await this.postRepository.findById(id)
     this.handleNotFound(post, id)
     return post
@@ -38,11 +38,11 @@ export class PostsService {
     return deletedPost
   }
 
-  private handleNotFound(post: TypePost | undefined, id: TypePost['id']): asserts post is TypePost {
+  private handleNotFound(post: TypePost | TypePostWithCategory | undefined, id: TypePost['id']): asserts post is TypePost {
     if (!post) throw new NotFoundException(`Post with id ${id} not found`)
   }
 
-  private handleNotFoundBySlug(post: TypePost | undefined, slug: TypePost['slug']): asserts post is TypePost {
+  private handleNotFoundBySlug(post: TypePost | TypePostWithCategory | undefined, slug: TypePost['slug']): asserts post is TypePost {
     if (!post) throw new NotFoundException(`Post with slug ${slug} not found`)
   }
 }

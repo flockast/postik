@@ -9,10 +9,10 @@ export type TypeCategory = {
 }
 
 export type TypeCategoryCreate = {
-  slug: string
-  title: string
-  description?: string
-  parentId?: number
+  slug: TypeCategory['slug']
+  title: TypeCategory['title']
+  description?: TypeCategory['description']
+  parentId?: TypeCategory['parentId']
 }
 
 export type TypeCategoryUpdate = Partial<TypeCategoryCreate>

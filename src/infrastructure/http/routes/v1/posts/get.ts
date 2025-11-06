@@ -1,7 +1,7 @@
 import { type FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox'
-import { PostSchemas } from '../../../schemas'
-import { decodeSort } from '../../../utils/decodeSort'
 import type { Static } from '@sinclair/typebox'
+import { decodeSort } from '../../../utils/decodeSort'
+import { PostSchemas } from '../../../schemas'
 
 const route: FastifyPluginAsyncTypebox = async (app) => {
   app.get<{
@@ -30,7 +30,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
       tags: ['Posts'],
       params: PostSchemas.Params.PostId,
       response: {
-        200: PostSchemas.Bodies.Post
+        200: PostSchemas.Bodies.PostWithCategory
       }
     }
   }, (request) => {

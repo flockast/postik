@@ -1,6 +1,6 @@
-import type { ICategoryRepository } from './repository'
-import type { TypeCategory, TypeCategoryCreate, TypeCategoryUpdate } from './models'
 import { NotFoundException } from '../commons'
+import type { TypeCategory, TypeCategoryCreate, TypeCategoryUpdate } from '../entities/category.entity'
+import type { ICategoryRepository } from '../repositories/category.repository'
 
 export class CategoriesService {
   constructor(private readonly categoryRepository: ICategoryRepository) {}

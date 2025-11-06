@@ -18,7 +18,7 @@ export class Server {
       redact: {
         paths: [
           '[*].password',
-          '[*].user',
+          '[*].user'
         ],
         censor: "***"
       }

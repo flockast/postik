@@ -4,7 +4,7 @@ export type TypePagination = {
 }
 
 export type TypePaginatedResult<T> = {
-  count: number
+  total: number
   data: T[]
 }
 

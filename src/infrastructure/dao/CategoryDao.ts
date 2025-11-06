@@ -1,9 +1,5 @@
-import type {
-  ICategoryRepository,
-  TypeCategory,
-  TypeCategoryCreate,
-  TypeCategoryUpdate
-} from '../../application/categories'
+import type { TypeCategory, TypeCategoryCreate, TypeCategoryUpdate } from '../../application/entities/category.entity'
+import type { ICategoryRepository } from '../../application/repositories/category.repository'
 import { type Kysely, type SelectExpression, sql } from 'kysely'
 import type { DB } from 'kysely-codegen'
 

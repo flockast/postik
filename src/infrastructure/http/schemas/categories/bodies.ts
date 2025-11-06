@@ -10,13 +10,9 @@ export const Category = Type.Object({
 
 export const CategoriesList = Type.Array(Category)
 
-export const CategoryCreate = Type.Object({
-  slug: Type.String({
-    pattern: '^[a-z0-9]+(?:[-_][a-z0-9]+)*$'
-  }),
-  title: Type.String(),
-  description: Type.Optional(Type.String()),
-  parentId: Type.Optional(Type.Number())
-})
+export const CategoryCreate = Type.Composite([
+  Type.Pick(Category, ['slug', 'title']),
+  Type.Partial(Type.Pick(Category, ['description', 'parentId']))
+])
 
 export const CategoryUpdate = Type.Partial(CategoryCreate)
