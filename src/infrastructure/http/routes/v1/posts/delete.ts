@@ -12,7 +12,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
     }
   }, (request) => {
     const { postId } = request.params
-    return app.postsService.delete(postId!)
+    return app.postService.delete(postId!)
   })
 }
 

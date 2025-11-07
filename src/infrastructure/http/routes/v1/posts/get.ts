@@ -16,7 +16,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
     }
   }, (request) => {
     const { offset, limit, sort } = request.query
-    return app.postsService.findAll(
+    return app.postService.findAll(
       {
         offset: offset!,
         limit: limit!
@@ -35,7 +35,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
     }
   }, (request) => {
     const { postId } = request.params
-    return app.postsService.findById(postId!)
+    return app.postService.findById(postId!)
   })
 
   app.get('/slug/:slug', {
@@ -48,7 +48,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
     }
   }, (request) => {
     const { slug } = request.params
-    return app.postsService.findBySlug(slug!)
+    return app.postService.findBySlug(slug!)
   })
 }
 

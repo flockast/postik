@@ -1,21 +1,21 @@
 import { type FastifyPluginAsyncTypebox} from '@fastify/type-provider-typebox'
 import type { Static } from '@sinclair/typebox'
-import { PostSchemas } from '../../../schemas'
+import { TagsSchema } from '../../../schemas'
 
 const route: FastifyPluginAsyncTypebox = async (app) => {
   app.post<{
-    Body: Static<typeof PostSchemas.Bodies.CreatePost>
+    Body: Static<typeof TagsSchema.Bodies.TagCreate>
   }>('/', {
     schema: {
-      tags: ['Posts'],
-      body: PostSchemas.Bodies.CreatePost,
+      tags: ['Tags'],
+      body: TagsSchema.Bodies.TagCreate,
       response: {
-        201: PostSchemas.Bodies.PostWithCategory
+        201: TagsSchema.Bodies.Tag
       }
     }
   }, async (request, reply) => {
-    const newPost = await app.postService.create(request.body)
-    reply.status(201).send(newPost)
+    const newTag = await app.tagsService.create(request.body)
+    reply.status(201).send(newTag)
   })
 }
 

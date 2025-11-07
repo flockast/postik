@@ -12,7 +12,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
     }
   }, (request) => {
     const { categoryId } = request.params
-    return app.categoriesService.delete(categoryId!)
+    return app.categoryService.delete(categoryId!)
   })
 }
 

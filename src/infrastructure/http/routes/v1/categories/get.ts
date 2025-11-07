@@ -10,7 +10,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
       }
     }
   }, () => {
-    return app.categoriesService.findAll()
+    return app.categoryService.findAll()
   })
 
   app.get('/:categoryId', {
@@ -23,7 +23,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
     }
   }, (request) => {
     const { categoryId } = request.params
-    return app.categoriesService.findById(categoryId!)
+    return app.categoryService.findById(categoryId!)
   })
 
   app.get('/slug/:categorySlug', {
@@ -36,7 +36,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
     }
   }, (request) => {
     const { categorySlug } = request.params
-    return app.categoriesService.findBySlug(categorySlug!)
+    return app.categoryService.findBySlug(categorySlug!)
   })
 }
 

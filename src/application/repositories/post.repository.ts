@@ -3,7 +3,7 @@ import type { TypePost, TypePostCreate, TypePostUpdate } from '../entities/post.
 import type { TypeCategory } from '../entities/category.entity'
 
 export type TypePostWithCategory = TypePost & {
-    category: TypeCategory | null
+  category: TypeCategory | null
 }
 
 export interface IPostRepository {

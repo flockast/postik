@@ -14,7 +14,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
       }
     }
   }, async (request, reply) => {
-    const newCategory = await app.categoriesService.create(request.body)
+    const newCategory = await app.categoryService.create(request.body)
     reply.status(201).send(newCategory)
   })
 }

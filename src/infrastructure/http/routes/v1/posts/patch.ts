@@ -13,7 +13,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
     }
   }, (request) => {
     const { postId } = request.params
-    return app.postsService.update(postId!, request.body)
+    return app.postService.update(postId!, request.body)
   })
 }
 

@@ -2,7 +2,7 @@ import { NotFoundException } from '../commons'
 import type { TypeCategory, TypeCategoryCreate, TypeCategoryUpdate } from '../entities/category.entity'
 import type { ICategoryRepository } from '../repositories/category.repository'
 
-export class CategoriesService {
+export class CategoryService {
   constructor(private readonly categoryRepository: ICategoryRepository) {}
 
   findAll() {
