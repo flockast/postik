@@ -1,170 +1,203 @@
-import type { Kysely, SelectExpression } from 'kysely'
+import { sql, type Kysely, type SelectExpression } from 'kysely'
 import type { DB } from 'kysely-codegen'
 import type { TypePaginatedResult, TypePagination, TypeSortBy } from '../../../application/commons'
 import type { TypePost, TypePostCreate, TypePostUpdate } from '../../../application/entities/post.entity'
-import type { IPostRepository, TypePostWithCategory } from '../../../application/repositories/post.repository'
+import type { IPostRepository, TypePostWithCategory, TypePostWithRelations } from '../../../application/repositories/post.repository'
 import { buildSortBy } from '../utils'
-import { postMapper } from './post.mapper'
+import type { TypeCategory } from '../../../application/entities/category.entity'
+import type { TypeTag } from '../../../application/entities/tag.entity'
 
 export class PostDao implements IPostRepository {
   protected readonly POSTS_FIELDS = [
-    'posts.id',
-    'posts.slug',
-    'posts.title',
-    'posts.content',
+    'posts.id as id',
+    'posts.slug as slug',
+    'posts.title as title',
+    'posts.content as content',
     'posts.category_id as categoryId',
     'posts.created_at as createdAt',
     'posts.updated_at as updatedAt',
   ] satisfies ReadonlyArray<SelectExpression<DB, 'posts'>>
 
-  protected readonly CATEGORIES_FIELDS = [
-    'categories.slug as categorySlug',
-    'categories.title as categoryTitle',
-    'categories.description as categoryDescription',
-    'categories.parent_id as categoryParentId',
-    'categories.created_at as categoryCreatedAt',
-    'categories.updated_at as categoryUpdatedAt'
-  ] satisfies ReadonlyArray<SelectExpression<DB, 'categories'>>
+  protected readonly CATEGORIES_AGGREGATION = sql<TypeCategory>`
+    CASE
+      WHEN categories.id IS NOT NULL THEN
+        json_build_object(
+          'id', ${sql.ref('categories.id')},
+          'slug', ${sql.ref('categories.slug')},
+          'title', ${sql.ref('categories.title')},
+          'description', ${sql.ref('categories.description')},
+          'parentId', ${sql.ref('categories.parent_id')},
+          'createdAt', ${sql.ref('categories.created_at')},
+          'updatedAt', ${sql.ref('categories.updated_at')}
+        )
+      ELSE NULL
+    END
+  `.as('category')
+
+  protected readonly TAGS_AGGREGATION = sql<TypeTag[]>`
+    json_agg(
+      json_build_object(
+        'id', ${sql.ref('tags.id')},
+        'slug', ${sql.ref('tags.slug')},
+        'title', ${sql.ref('tags.title')},
+        'description', ${sql.ref('tags.description')}
+      )
+    ) FILTER (WHERE tags.id IS NOT NULL)
+  `.as('tags')
 
   constructor(protected readonly db: Kysely<DB>) {}
+
+  private buildPostQuery(trx?: Kysely<DB>) {
+    const queryBuilder = trx || this.db
+
+    return queryBuilder
+      .selectFrom('posts')
+      .leftJoin('categories', 'categories.id', 'category_id')
+      .leftJoin('post_tags', 'post_tags.post_id', 'posts.id')
+      .leftJoin('tags', 'tags.id', 'post_tags.tag_id')
+      .select([
+        ...this.POSTS_FIELDS,
+        this.CATEGORIES_AGGREGATION,
+        this.TAGS_AGGREGATION
+      ])
+      .groupBy(['posts.id', 'categories.id'])
+  }
 
   async findAll(pagination: TypePagination, sortBy: TypeSortBy<TypePost>): Promise<TypePaginatedResult<TypePostWithCategory>> {
     const countQuery = this.db
       .selectFrom('posts')
       .select(({ fn }) => (
-        [fn.count<number>('id').as('count')]
+        [fn.count<number>('posts.id').as('count')]
       ))
       .executeTakeFirst()
 
-    const postsQuery = this.db
-      .selectFrom('posts')
-      .leftJoin('categories', 'categories.id', 'category_id')
-      .orderBy(buildSortBy<'posts', TypePost>(sortBy))
+    const postsQuery = this.buildPostQuery()
+      .orderBy(buildSortBy<'posts', TypePost>(sortBy, 'posts'))
       .offset(pagination.offset)
       .limit(pagination.limit)
-      .select([
-        ...this.POSTS_FIELDS,
-        ...this.CATEGORIES_FIELDS
-      ])
       .execute()
 
     const [countResult, postsResult] = await Promise.all([countQuery, postsQuery])
 
     return {
       total: countResult?.count ?? 0,
-      data: postsResult.map(postMapper)
+      data: postsResult
     }
   }
 
-  async findById(id: TypePost['id']): Promise<TypePostWithCategory | undefined> {
-    const result = await this.db
-      .selectFrom('posts')
-      .leftJoin('categories', 'categories.id', 'category_id')
-      .select([
-        ...this.POSTS_FIELDS,
-        ...this.CATEGORIES_FIELDS
-      ])
-      .where('posts.id', '=', id)
-      .executeTakeFirst()
+async findById(id: TypePost['id']): Promise<TypePostWithRelations | undefined> {
+  const postResult = await this.buildPostQuery()
+    .where('posts.id', '=', id)
+    .executeTakeFirst()
 
-    if (!result) {
-      return undefined
-    }
-
-    return postMapper(result)
+  if (!postResult) {
+    return undefined
   }
 
-  async findBySlug(slug: TypePost['slug']): Promise<TypePostWithCategory | undefined> {
-    const result = await this.db
-      .selectFrom('posts')
-      .leftJoin('categories', 'categories.id', 'category_id')
+  return postResult
+}
+
+  async findBySlug(slug: TypePost['slug']): Promise<TypePostWithRelations | undefined> {
+    const postResult = await this.buildPostQuery()
       .where('posts.slug', '=', slug)
-      .select([
-        ...this.POSTS_FIELDS,
-        ...this.CATEGORIES_FIELDS
-      ])
       .executeTakeFirst()
 
-    if (!result) {
+    if (!postResult) {
       return undefined
     }
 
-    return postMapper(result)
+    return postResult
   }
 
-  async create(post: TypePostCreate): Promise<TypePostWithCategory> {
-    const newPost = await this.db
-      .insertInto('posts')
-      .values({
-        title: post.title,
-        slug: post.slug,
-        content: post.content,
-        category_id: post.categoryId
-      })
-      .returning(this.POSTS_FIELDS)
-      .executeTakeFirstOrThrow()
+  async create(post: TypePostCreate): Promise<TypePostWithRelations> {
+    return this.db.transaction().execute(async (trx) => {
+      const newPost = await trx
+        .insertInto('posts')
+        .values({
+          title: post.title,
+          slug: post.slug,
+          content: post.content,
+          category_id: post.categoryId
+        })
+        .returning(this.POSTS_FIELDS)
+        .executeTakeFirstOrThrow()
 
-    if (!newPost.categoryId) {
-      return postMapper(newPost)
-    }
+      if (post.tagIds && post.tagIds.length) {
+        await trx
+          .insertInto('post_tags')
+          .values(
+            post.tagIds.map((tagId) => ({
+              post_id: newPost.id,
+              tag_id: tagId
+            }))
+          )
+          .execute()
+      }
 
-    const category = await this.db
-      .selectFrom('categories')
-      .where('id', '=', newPost.categoryId)
-      .select(this.CATEGORIES_FIELDS)
-      .executeTakeFirst()
-
-    return postMapper({
-      ...newPost,
-      ...category
+      return this.buildPostQuery(trx)
+        .where('posts.id', '=', newPost.id)
+        .executeTakeFirstOrThrow()
     })
   }
 
-  async update(id: TypePost['id'], post: TypePostUpdate): Promise<TypePostWithCategory | undefined> {
-    const updatedPost = await this.db
-      .updateTable('posts')
-      .set({
-        title: post.title,
-        slug: post.slug,
-        content: post.content,
-        category_id: post.categoryId
-      })
-      .where('id', '=', id)
-      .returning(this.POSTS_FIELDS)
-      .executeTakeFirst()
+  async update(id: TypePost['id'], post: TypePostUpdate): Promise<TypePostWithRelations | undefined> {
+    return this.db.transaction().execute(async (trx) => {
+      const updatedPost = await trx
+        .updateTable('posts')
+        .set({
+          title: post.title,
+          slug: post.slug,
+          content: post.content,
+          category_id: post.categoryId,
+          updated_at: sql`CURRENT_TIMESTAMP`
+        })
+        .where('id', '=', id)
+        .returning(this.POSTS_FIELDS)
+        .executeTakeFirst()
 
-    if (!updatedPost) {
-      return undefined
-    }
+      if (!updatedPost) {
+        return undefined
+      }
 
-    if (!updatedPost.categoryId) {
-      return postMapper(updatedPost)
-    }
+      if (post.tagIds !== undefined) {
+        await trx
+          .deleteFrom('post_tags')
+          .where('post_id', '=', id)
+          .execute()
+      }
 
-    const category = await this.db
-      .selectFrom('categories')
-      .where('id', '=', updatedPost.categoryId)
-      .select(this.CATEGORIES_FIELDS)
-      .executeTakeFirst()
+      if (post.tagIds && post.tagIds.length) {
+        await trx
+          .insertInto('post_tags')
+          .values(post.tagIds.map((tagId) => ({
+            post_id: id,
+            tag_id: tagId
+          })))
+          .execute()
+      }
 
-    return postMapper({
-      ...updatedPost,
-      ...category
+      return this.buildPostQuery(trx)
+        .where('posts.id', '=', id)
+        .executeTakeFirstOrThrow()
     })
   }
 
-  async delete(id: TypePost['id']): Promise<TypePostWithCategory | undefined> {
-    const result = await this.findById(id)
+  async delete(id: TypePost['id']): Promise<TypePostWithRelations | undefined> {
+    return this.db.transaction().execute(async (trx) => {
+      const postResult = await this.buildPostQuery(trx)
+        .where('posts.id', '=', id)
+        .executeTakeFirst()
 
-    if (!result) {
-      return undefined
-    }
+      if (!postResult) {
+        return undefined
+      }
 
-    await this.db
-      .deleteFrom('posts')
-      .where('id', '=', id)
-      .execute()
+      await trx
+        .deleteFrom('posts')
+        .where('id', '=', id)
+        .execute()
 
-    return result
+      return postResult
+    })
   }
 }

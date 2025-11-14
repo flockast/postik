@@ -1,7 +1,7 @@
 import { NotFoundException } from '../commons'
 import type { TypePagination, TypeSortBy, TypePaginatedResult } from '../commons'
 import type { TypePost, TypePostCreate, TypePostUpdate } from '../entities/post.entity'
-import type { IPostRepository, TypePostWithCategory } from '../repositories/post.repository'
+import type { IPostRepository, TypePostWithCategory, TypePostWithRelations } from '../repositories/post.repository'
 
 export class PostService {
   constructor(protected readonly postRepository: IPostRepository) {}
@@ -10,29 +10,29 @@ export class PostService {
     return this.postRepository.findAll(pagination, sortBy)
   }
 
-  async findById(id: TypePost['id']): Promise<TypePostWithCategory> {
+  async findById(id: TypePost['id']): Promise<TypePostWithRelations> {
     const post = await this.postRepository.findById(id)
     this.handleNotFound(post, id)
     return post
   }
 
-  async findBySlug(slug: TypePost['slug']): Promise<TypePostWithCategory> {
+  async findBySlug(slug: TypePost['slug']): Promise<TypePostWithRelations> {
     const post = await this.postRepository.findBySlug(slug)
     this.handleNotFoundBySlug(post, slug)
     return post
   }
 
-  create(post: TypePostCreate): Promise<TypePostWithCategory> {
+  create(post: TypePostCreate): Promise<TypePostWithRelations> {
     return this.postRepository.create(post)
   }
 
-  async update(id: TypePost['id'], post: TypePostUpdate): Promise<TypePostWithCategory> {
+  async update(id: TypePost['id'], post: TypePostUpdate): Promise<TypePostWithRelations> {
     const updatedPost = await this.postRepository.update(id, post)
     this.handleNotFound(updatedPost, id)
     return updatedPost
   }
 
-  async delete(id: TypePost['id']): Promise<TypePostWithCategory> {
+  async delete(id: TypePost['id']): Promise<TypePostWithRelations> {
     const deletedPost = await this.postRepository.delete(id)
     this.handleNotFound(deletedPost, id)
     return deletedPost

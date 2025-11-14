@@ -13,6 +13,7 @@ export type TypePostCreate = {
   title: TypePost['title']
   content: TypePost['content']
   categoryId?: TypePost['categoryId']
+  tagIds?: number[]
 }
 
 export type TypePostUpdate = Partial<TypePostCreate>

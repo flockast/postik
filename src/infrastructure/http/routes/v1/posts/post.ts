@@ -10,7 +10,7 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
       tags: ['Posts'],
       body: PostSchemas.Bodies.CreatePost,
       response: {
-        201: PostSchemas.Bodies.PostWithCategory
+        201: PostSchemas.Bodies.PostWithRelations
       }
     }
   }, async (request, reply) => {

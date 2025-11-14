@@ -1,6 +1,6 @@
 CREATE TABLE post_tags (
-  post_id BIGINT NOT NULL,
-  tag_id BIGINT NOT NULL,
+  post_id SERIAL NOT NULL,
+  tag_id SERIAL NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
 
   PRIMARY KEY (post_id, tag_id),

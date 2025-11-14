@@ -25,6 +25,28 @@ export const PostWithCategory = Type.Composite([
   })
 ])
 
+export const PostWithRelations = Type.Composite([
+  Post,
+  Type.Object({
+    category: Type.Union([
+      Type.Object({
+        id: Type.Number(),
+        slug: Type.String(),
+        title: Type.String(),
+        description: Type.Union([Type.String(), Type.Null()]),
+        parentId: Type.Union([Type.Number(), Type.Null()])
+      }),
+      Type.Null()
+    ]),
+    tags: Type.Array(Type.Object({
+      id: Type.Number(),
+      slug: Type.String(),
+      title: Type.String(),
+      description: Type.Union([Type.String(), Type.Null()])
+    }))
+  })
+])
+
 export const CreatePost = Type.Composite([
   Type.Pick(Post, ['title', 'content', 'slug']),
   Type.Partial(Type.Pick(Post, ['categoryId']))
